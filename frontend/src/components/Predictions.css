@@ -1,0 +1,42 @@
+/* Modern custom styles for enhanced animations and effects */
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-4px); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { 
+    box-shadow: 0 0 0 0 rgba(56, 0, 60, 0.4);
+  }
+  50% { 
+    box-shadow: 0 0 0 10px rgba(56, 0, 60, 0);
+  }
+}
+
+.float-animation {
+  animation: float 3s ease-in-out infinite;
+}
+
+.pulse-glow {
+  animation: pulse-glow 2s infinite;
+}
+
+/* Custom scrollbar for sidebar */
+.predictions-sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.predictions-sidebar::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 3px;
+}
+
+.predictions-sidebar::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+.predictions-sidebar::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}

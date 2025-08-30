@@ -1,0 +1,34 @@
+{
+  "version": 2,
+  "name": "barnbowl-premier-predictions",
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "build"
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/static/(.*)",
+      "headers": {
+        "cache-control": "public, max-age=31536000, immutable"
+      }
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
+  ],
+  "env": {
+    "REACT_APP_ENVIRONMENT": "production",
+    "REACT_APP_APP_NAME": "BARNBOWL PremPredictions"
+  },
+  "functions": {
+    "app/api/*.js": {
+      "runtime": "@vercel/node"
+    }
+  }
+}
