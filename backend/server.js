@@ -1,6 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const path = require('path');
 require('dotenv').config();
 
 const app = express();
@@ -29,14 +30,15 @@ app.get('/api/users', async (req, res) => {
   res.json(users);
 });
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`PremPredictions server running on port ${PORT}`));
 // Serve frontend build in production
 if (process.env.NODE_ENV === 'production') {
-  const path = require('path');
   app.use(express.static(path.join(__dirname, '../frontend/build')));
-  
-  app.get('*', (req, res) => {
+
+  // ✅ Express 5-friendly catch-all for SPA
+  app.get('/(.*)', (req, res) => {
     res.sendFile(path.join(__dirname, '../frontend/build', 'index.html'));
   });
 }
+
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`PremPredictions server running on port ${PORT}`));
