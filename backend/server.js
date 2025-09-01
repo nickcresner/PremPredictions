@@ -16,7 +16,7 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost/prempredictions
   .catch(err => console.log('MongoDB connection error:', err));
 
 // Routes
-// app.use('/api/predictions', require('./routes/predictions'));
+app.use('/api/predictions', require('./routes/predictions')); // ← re-enable when ready
 
 // Basic test route
 app.get('/api/test', (req, res) => {
@@ -34,8 +34,8 @@ app.get('/api/users', async (req, res) => {
 if (process.env.NODE_ENV === 'production') {
   app.use(express.static(path.join(__dirname, '../frontend/build')));
 
-  // ✅ Express 5-friendly catch-all for SPA
-  app.get('/(.*)', (req, res) => {
+  // ✅ Express 5 catch-all (named wildcard)
+  app.get('/{*splat}', (req, res) => {
     res.sendFile(path.join(__dirname, '../frontend/build', 'index.html'));
   });
 }
