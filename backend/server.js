@@ -16,7 +16,7 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost/prempredictions
   .catch(err => console.log('MongoDB connection error:', err));
 
 // Routes
-app.use('/api/predictions', require('./routes/predictions'));
+// app.use('/api/predictions', require('./routes/predictions'));
 
 // Basic test route
 app.get('/api/test', (req, res) => {
