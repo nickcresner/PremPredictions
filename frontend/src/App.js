@@ -282,7 +282,6 @@ function App() {
         {/* This is rendered by AppContent state; we can’t lift easily without context */}
       </div>
     </Router>
-  const navigate = useNavigate();
   );
 }
 
