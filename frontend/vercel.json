@@ -25,10 +25,5 @@
   "env": {
     "REACT_APP_ENVIRONMENT": "production",
     "REACT_APP_APP_NAME": "BARNBOWL PremPredictions"
-  },
-  "functions": {
-    "app/api/*.js": {
-      "runtime": "@vercel/node"
-    }
   }
 }
