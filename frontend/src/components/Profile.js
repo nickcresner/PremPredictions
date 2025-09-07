@@ -26,8 +26,8 @@ function Profile({ currentUser }) {
     try {
       // Fetch user profile and prediction history
       const [profileRes, historyRes] = await Promise.all([
-        axios.get(`http://localhost:5001/api/users/${currentUser}`),
-        axios.get(`http://localhost:5001/api/predictions/history/${currentUser}`)
+        axios.get(`/api/users/${currentUser}`),
+        axios.get(`/api/predictions/history/${currentUser}`)
       ]);
       
       setUserProfile(profileRes.data);
@@ -48,7 +48,7 @@ function Profile({ currentUser }) {
     }
 
     try {
-      await axios.put(`http://localhost:5001/api/users/${currentUser}/password`, {
+      await axios.put(`/api/users/${currentUser}/password`, {
         currentPassword: passwordForm.currentPassword,
         newPassword: passwordForm.newPassword
       });

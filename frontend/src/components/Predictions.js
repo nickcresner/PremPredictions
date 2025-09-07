@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
 import { LEAGUE_PREDICTION_POINTS } from '../utils/scoringSystem';
 import OddsDisplay from './OddsDisplay';
 import './Predictions.css';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 const TEAMS = [
   'Arsenal', 'Aston Villa', 'Bournemouth', 'Brentford', 'Brighton',
@@ -12,6 +13,8 @@ const TEAMS = [
 ];
 
 function Predictions({ currentUser }) {
+  const location = useLocation();
+  const navigate = useNavigate();
   const [predictions, setPredictions] = useState([]);
   const [myPrediction, setMyPrediction] = useState({
     topEight: Array(8).fill(''),
@@ -20,15 +23,31 @@ function Predictions({ currentUser }) {
   });
   const [editing, setEditing] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [showCelebration, setShowCelebration] = useState(false);
+  const seasonKey = '2024-25';
+  const savedKey = useMemo(() => `predictionSaved:${currentUser || 'anon'}:${seasonKey}`, [currentUser]);
 
   useEffect(() => {
     fetchPredictions();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    // Trigger onboarding if navigated with state or first time user with no saved flag
+    const wantsOnboarding = location.state?.onboarding;
+    if (wantsOnboarding) {
+      setShowOnboarding(true);
+      setEditing(true);
+      // Clear the state so refresh doesn't keep forcing it
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const fetchPredictions = async () => {
     try {
-      const response = await axios.get('http://localhost:5001/api/predictions');
+      const response = await axios.get('/api/predictions');
       setPredictions(response.data);
       
       // Find current user's prediction
@@ -39,6 +58,16 @@ function Predictions({ currentUser }) {
           bottomThree: mine.bottomThree.map(t => t.team),
           favoriteTeam: mine.favoriteTeam || ''
         });
+        // If the user already has a prediction, don't show onboarding next time
+        localStorage.setItem(savedKey, 'true');
+        setShowOnboarding(false);
+        setEditing(false);
+      } else {
+        // No prediction yet: if no saved flag, show onboarding prompt
+        if (!localStorage.getItem(savedKey)) {
+          setShowOnboarding(true);
+          setEditing(true);
+        }
       }
       setLoading(false);
     } catch (error) {
@@ -49,6 +78,14 @@ function Predictions({ currentUser }) {
 
   const handleSubmit = async () => {
     try {
+      // Basic validation
+      const allTop8Picked = myPrediction.topEight.every(Boolean);
+      const allBottom3Picked = myPrediction.bottomThree.every(Boolean);
+      if (!allTop8Picked || !allBottom3Picked) {
+        alert('Please select all Top 8 and Bottom 3 teams before saving.');
+        return;
+      }
+
       const formattedPrediction = {
         userName: currentUser,
         favoriteTeam: myPrediction.favoriteTeam,
@@ -64,8 +101,10 @@ function Predictions({ currentUser }) {
         }))
       };
 
-      await axios.post('http://localhost:5001/api/predictions', formattedPrediction);
-      alert('Prediction saved!');
+      await axios.post('/api/predictions', formattedPrediction);
+      localStorage.setItem(savedKey, 'true');
+      // Strong feedback: celebration overlay
+      setShowCelebration(true);
       setEditing(false);
       fetchPredictions();
     } catch (error) {
@@ -110,6 +149,29 @@ function Predictions({ currentUser }) {
   
   return (
     <div className="space-y-6">
+      {showCelebration && (
+        <CelebrationOverlay onClose={() => setShowCelebration(false)} />
+      )}
+      {showOnboarding && (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <div className="flex items-start space-x-3">
+            <div className="text-2xl">🎯</div>
+            <div>
+              <h3 className="text-lg font-semibold text-blue-900 mb-1">Welcome! Make Your Season Prediction</h3>
+              <ul className="text-sm text-blue-800 list-disc ml-5 space-y-1">
+                <li>Pick your Top 8 teams in exact order (1–8).</li>
+                <li>Pick your Bottom 3 (positions 18–20).</li>
+                <li>No duplicate teams — each club can appear once.</li>
+                <li>Deadline: August 31st, 2025 (then predictions lock).</li>
+                <li>You’re not in the game until you save.</li>
+              </ul>
+              <div className="mt-3">
+                <button onClick={() => setEditing(true)} className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Start my prediction</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
       <div className="text-center mb-8">
         <h2 className="text-3xl font-bold text-gray-900 mb-2">League Predictions - Season 2025/26</h2>
         <p className="text-gray-600">Make your predictions for the Premier League season</p>
@@ -404,6 +466,23 @@ function Predictions({ currentUser }) {
             their bookmaker expectations, you could earn huge bonus points. The lower the betting probability, 
             the higher your multiplier if you're right!
           </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Simple celebration overlay without extra libraries
+function CelebrationOverlay({ onClose }) {
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
+      <div className="bg-white rounded-2xl p-8 max-w-md mx-4 text-center shadow-2xl">
+        <div className="text-5xl mb-3">🎉🎊</div>
+        <h3 className="text-2xl font-extrabold mb-2">You're in the game!</h3>
+        <p className="text-gray-600 mb-6">Your season predictions are locked in. Good luck!</p>
+        <div className="flex space-x-3 justify-center">
+          <button onClick={onClose} className="bg-primary-600 text-white px-5 py-2 rounded hover:bg-primary-700">Back to app</button>
+          <a href="/" className="bg-gray-200 text-gray-800 px-5 py-2 rounded hover:bg-gray-300">View leaderboard</a>
         </div>
       </div>
     </div>

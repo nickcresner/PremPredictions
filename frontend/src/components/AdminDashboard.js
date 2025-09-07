@@ -20,8 +20,8 @@ function AdminDashboard({ currentUser }) {
   const fetchData = async () => {
     try {
       const [predictionsRes, usersRes] = await Promise.all([
-        axios.get('http://localhost:5001/api/predictions'),
-        axios.get('http://localhost:5001/api/users')
+        axios.get('/api/predictions'),
+        axios.get('/api/users')
       ]);
       setPredictions(predictionsRes.data);
       setUsers(usersRes.data || []);
@@ -41,7 +41,7 @@ function AdminDashboard({ currentUser }) {
   const resetUserPredictions = async (userId) => {
     if (window.confirm('Are you sure you want to reset this user\'s predictions?')) {
       try {
-        await axios.delete(`http://localhost:5001/api/predictions/user/${userId}`);
+        await axios.delete(`/api/predictions/user/${userId}`);
         fetchData();
         alert('User predictions reset successfully');
       } catch (error) {
@@ -53,7 +53,7 @@ function AdminDashboard({ currentUser }) {
   const deleteUser = async (userId) => {
     if (window.confirm('Are you sure you want to delete this user?')) {
       try {
-        await axios.delete(`http://localhost:5001/api/users/${userId}`);
+        await axios.delete(`/api/users/${userId}`);
         fetchData();
         alert('User deleted successfully');
       } catch (error) {
@@ -64,7 +64,7 @@ function AdminDashboard({ currentUser }) {
 
   const updatePrediction = async (prediction, newData) => {
     try {
-      await axios.put(`http://localhost:5001/api/predictions/${prediction._id}`, newData);
+      await axios.put(`/api/predictions/${prediction._id}`, newData);
       fetchData();
       setEditingPrediction(null);
       alert('Prediction updated successfully');
@@ -80,7 +80,7 @@ function AdminDashboard({ currentUser }) {
 
     try {
       setUploadingPhoto(userId);
-      await axios.post('http://localhost:5001/api/users/upload-photo', formData, {
+      await axios.post('/api/users/upload-photo', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       fetchData();

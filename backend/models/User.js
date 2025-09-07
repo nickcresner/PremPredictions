@@ -4,7 +4,17 @@ const userSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
-    enum: ['Nick', 'Paul', 'James', 'Bigman', 'Dave', 'Alex']
+    trim: true,
+    unique: true,
+  },
+  email: {
+    type: String,
+    trim: true,
+  },
+  role: {
+    type: String,
+    enum: ['super_admin', 'admin', 'user'],
+    default: 'user'
   },
   isAdmin: {
     type: Boolean,
@@ -19,7 +29,11 @@ const userSchema = new mongoose.Schema({
   weeklyPoints: [{
     week: Number,
     points: Number
-  }]
+  }],
+  createdAt: {
+    type: Date,
+    default: Date.now
+  }
 });
 
 module.exports = mongoose.model('User', userSchema);
