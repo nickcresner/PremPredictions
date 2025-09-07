@@ -69,6 +69,7 @@ function AppContent() {
   const [showJoin, setShowJoin] = useState(false);
   const [joinName, setJoinName] = useState('');
   const [joinTeam, setJoinTeam] = useState('');
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Load from localStorage if available
