@@ -1,8 +1,8 @@
 # ---------- Build stage ----------
-FROM node:18-alpine AS builder
+FROM node:20-alpine AS builder
 WORKDIR /app
 
-# Copy manifests first (better cache)
+# Copy manifests first (cache)
 COPY frontend/package*.json ./frontend/
 COPY backend/package*.json ./backend/
 
@@ -12,26 +12,30 @@ RUN npm ci
 WORKDIR /app/backend
 RUN npm ci
 
-# Copy the rest of the source
+# Copy source
 WORKDIR /app
 COPY . .
 
 # Build frontend
 WORKDIR /app/frontend
 RUN npm run build
-# If using Vite (outputs "dist"), rename it so server.js finds "build"
+# If using Vite (dist), rename so server.js finds "build"
 RUN if [ -d dist ]; then mv dist build; fi
 
 # ---------- Run stage ----------
-FROM node:18-alpine
+FROM node:20-alpine
 WORKDIR /app/backend
 
-# Install backend deps (prod-only)
-COPY --from=builder /app/backend/package*.json ./
+RUN apk add --no-cache bash
+
+# Backend deps (prod)
+COPY backend/package*.json ./
 RUN npm ci --omit=dev
 
-# Copy backend source and built frontend
-COPY --from=builder /app/backend ./
+# Backend source
+COPY backend/. .
+
+# Copy built frontend for static serving
 COPY --from=builder /app/frontend/build ../frontend/build
 
 ENV NODE_ENV=production

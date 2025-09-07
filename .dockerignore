@@ -1,6 +1,10 @@
+node_modules
+**/node_modules
 .git
 .gitignore
-**/node_modules
-**/.env
-frontend/dist
-frontend/build
+Dockerfile
+.dockerignore
+npm-debug.log
+.env
+.env.*
+frontend/node_modules
